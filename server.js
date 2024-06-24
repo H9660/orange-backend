@@ -10,7 +10,9 @@ const port = process.env.PORT || 5000;
 connectDB();
 
 const app = express();
-app.use(cors()) // Replace with your frontend URL));
+app.use(cors({
+  origin: "https://orange-frontend-git-main-h9660s-projects.vercel.app/" 
+})) // Replace with your frontend URL));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
