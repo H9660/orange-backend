@@ -10,9 +10,7 @@ const port = process.env.PORT || 5000;
 connectDB();
 
 const app = express();
-app.use(cors({
-  origin: 'https://orange-frontend--kappa.vercel.app/', // Replace with your frontend URL
-}));
+app.use(cors()) // Replace with your frontend URL));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
