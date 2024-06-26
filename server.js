@@ -11,7 +11,7 @@ connectDB();
 
 const app = express();
 app.use(cors({
-  origin: "https://orange-frontend--kappa.vercel.app/",
+  origin: "https://orange-frontend--kappa.vercel.app",
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
