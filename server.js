@@ -6,14 +6,14 @@ const cors = require('cors')
 const { errorHandler } = require("./middleware/errorMiddleware");
 const dotenv = require("dotenv").config();
 const connectDB = require("./config/db");
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5000; 
 connectDB();
 
 const app = express();
 app.use(cors({
-  origin: "https://orange-frontend-git-main-h9660s-projects.vercel.app/" 
-})) // Replace with your frontend URL));
-
+  origin: "https://orange-frontend--kappa.vercel.app/",
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/auth", require("./middleware/googleMiddleware"));
