@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const axios = require("axios");
-const redisInstance = require('../config/redisClient'); // Adjust the path as needed
+const redisInstance = require("../config/redisClient"); // Adjust the path as needed
 const Problem = require("../models/problemModel");
 // @desc    Get problems
 // @route   GET /api/problems
@@ -38,7 +38,8 @@ const getProblems = asyncHandler(async (req, res) => {
   }
 
   const problems = await Problem.find();
-  await redisInstance.set("problems", JSON.stringify(problems), "EX", 3600);
+  if (problems.length > 0)
+    await redisInstance.set("problems", JSON.stringify(problems), "EX", 3600);
   res.status(200).json(problems);
 });
 
