@@ -1,21 +1,44 @@
 const asyncHandler = require("express-async-handler");
 const axios = require("axios");
+const redisInstance = require('../config/redisClient'); // Adjust the path as needed
 const Problem = require("../models/problemModel");
 // @desc    Get problems
 // @route   GET /api/problems
 // @access  Private
+
 const getProblem = asyncHandler(async (req, res) => {
+  const title = req.params.title;
+  const existingProblem = await redisInstance.get(`problem: ${title}`);
+  if (existingProblem != null) {
+    console.log("fetched problem from redis");
+    return res.status(200).json(JSON.parse(existingProblem));
+  }
   const problem = await Problem.findOne({ title: req.params.title });
-  console.log(problem)
+
+  // console.log(problem)
   if (!problem) {
     res.status(400);
     throw new Error("Problem not found");
   }
+  await redisInstance.set(
+    `problem: ${title}`,
+    JSON.stringify(problem),
+    "EX",
+    3600
+  );
   res.status(200).json(problem);
 });
 
 const getProblems = asyncHandler(async (req, res) => {
+  const existingProblems = await redisInstance.get("problems");
+  console.log(existingProblems);
+  if (existingProblems != null) {
+    console.log("fetched all problems from redis");
+    return res.status(200).json(JSON.parse(existingProblems));
+  }
+
   const problems = await Problem.find();
+  await redisInstance.set("problems", JSON.stringify(problems), "EX", 3600);
   res.status(200).json(problems);
 });
 
@@ -27,7 +50,7 @@ const setProblem = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please add all the required fields");
   }
-  req.body.title = req.body.title.trimEnd()
+  req.body.title = req.body.title.trimEnd();
   console.log(req.body.testcases);
   const problem = await Problem.create({
     title: req.body.title,
@@ -65,6 +88,7 @@ const updateProblem = asyncHandler(async (req, res) => {
 // // @route   DELETE /api/problems/:id
 // // @access  Private
 const deleteProblem = asyncHandler(async (req, res) => {
+  const title = req.params.title;
   console.log(req.params.title);
   try {
     const deletedProblem = await Problem.findOneAndDelete({
@@ -75,6 +99,7 @@ const deleteProblem = asyncHandler(async (req, res) => {
       res.status(404).send("Problem not found");
       return;
     }
+    await redisInstance.del(`problem: ${title}`);
     res.status(200).send(deletedProblem);
   } catch (err) {
     console.error("Error deleting problem:", err);
@@ -191,7 +216,7 @@ const submitCode = asyncHandler(async (req, res) => {
         outputs.push(response.data.stderr);
       }
       if (response.data.stdout.trimEnd() === testcase.output)
-      // The trimEnd is to remove any escape sequence from the output.
+        // The trimEnd is to remove any escape sequence from the output.
         outputs.push("Accepted");
     } catch (error) {
       console.log("Error occurred: ", error);
