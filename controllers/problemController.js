@@ -34,7 +34,8 @@ const getProblems = asyncHandler(async (req, res) => {
   console.log(existingProblems);
   if (existingProblems != null) {
     console.log("fetched all problems from redis");
-    return res.status(200).json(JSON.parse(existingProblems));
+    res.status(200).json(JSON.parse(existingProblems));
+    return;
   }
 
   const problems = await Problem.find();
@@ -51,15 +52,22 @@ const setProblem = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please add all the required fields");
   }
-  req.body.title = req.body.title.trimEnd();
+  let title = req.body.title;
+  title = title.trimEnd();
   console.log(req.body.testcases);
   const problem = await Problem.create({
-    title: req.body.title,
+    title: title,
     statement: req.body.statement,
     testcases: req.body.testcases,
     constraints: req.body.constraints,
   });
 
+  let currProblems = await redisInstance.get("problems");
+  currProblems = currProblems ? JSON.parse(currProblems) : [];
+  currProblems.push(problem);
+  console.log(currProblems);
+  await redisInstance.set("problems", JSON.stringify(currProblems));
+  await redisInstance.incr("totalProblems");
   res.status(200).json(problem);
 });
 
@@ -100,7 +108,12 @@ const deleteProblem = asyncHandler(async (req, res) => {
       res.status(404).send("Problem not found");
       return;
     }
+
+    const totalProblems = await redisInstance.get("totalProblems");
     await redisInstance.del(`problem: ${title}`);
+    // In case we delete all the problems then in we need to clear the problem key from redis as well. So for that I created a variable totalProblems and when it is 1 and I am deleting a problem I delete that key as well
+    if (totalProblems == 1) await redisInstance.del("problems");
+    if (totalProblems >= 1) await redisInstance.decr("totalProblems");
     res.status(200).send(deletedProblem);
   } catch (err) {
     console.error("Error deleting problem:", err);
