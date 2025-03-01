@@ -104,9 +104,7 @@ const resetPassword = asyncHandler(async (req, res) => {
     throw new Error("Invalid user data");
   }
 });
-// @desc    Get user data
-// @route   GET /api/users/me
-// @access  Private
+
 const getMe = asyncHandler(async (req, res) => {
   res.status(200).json(req.user);
 });
