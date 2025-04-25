@@ -8,7 +8,7 @@
     ],
     "crons": [{
       "path": "/cron/pingGlot",
-      "schedule": "* * * * *"
+      "schedule": "0 9 * * *"
     }]  
   }
   
