@@ -3,9 +3,6 @@ const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 
-// @desc    Register new user
-// @route   POST /api/users
-// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, isAdmin } = req.body;
 
@@ -118,7 +115,7 @@ const updateSolvedProblems = asyncHandler(async (req, res) => {
       throw new Error("User not found");
     }
 
-    user.solvedProblems.push(title);
+    user.solvedProblems.push(title.title.title);
     const updatedUser = await User.findOneAndUpdate(
       { email: email },
       { solvedProblems: user.solvedProblems },
