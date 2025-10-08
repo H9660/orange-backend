@@ -200,10 +200,10 @@ const submitCode = asyncHandler(async (req, res) => {
   });
 
   await Promise.all(promises);
-  console.log(outputs);
+
   if (outputs[outputs.length - 2] == "Error")
     res.status(200).json({ output: outputs[outputs.length - 1] });
-  if (outputs.length === problem.testcases.length)
+  else if (outputs.length === problem.testcases.length)
     res.status(200).json({ output: "Accepted" });
   else res.status(200).json({ output: "Wrong Answer" });
 });
