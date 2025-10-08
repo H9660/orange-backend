@@ -6,7 +6,7 @@ const Problem = require("../models/problemModel");
 // @access  Private
 const getProblem = asyncHandler(async (req, res) => {
   const problem = await Problem.findOne({ title: req.params.title });
-  console.log(problem)
+  console.log(problem);
   if (!problem) {
     res.status(400);
     throw new Error("Problem not found");
@@ -27,7 +27,7 @@ const setProblem = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Please add all the required fields");
   }
-  req.body.title = req.body.title.trimEnd()
+  req.body.title = req.body.title.trimEnd();
   console.log(req.body.testcases);
   const problem = await Problem.create({
     title: req.body.title,
@@ -45,7 +45,7 @@ const setProblem = asyncHandler(async (req, res) => {
 const updateProblem = asyncHandler(async (req, res) => {
   try {
     const updatedProblem = await Problem.findOneAndUpdate(
-      { title: req.query.title },
+      { title: req.body.problemTitle },
       req.body,
       { new: true }
     );
@@ -151,13 +151,14 @@ const runCode = asyncHandler(async (req, res) => {
 
 const submitCode = asyncHandler(async (req, res) => {
   const { code, language, title } = req.body;
-  const problem = await Problem.findOne({ title: title.title });
+  const problem = await Problem.findOne({ title: title });
   const fileName = generateFileName(language);
   const headers = {
     Authorization: `Token ${process.env.GLOT_TOKEN}`,
     "Content-type": "application/json",
   };
   const outputs = [];
+  console.log("this tings sdfsdf", problem);
   const promises = problem.testcases.map(async (testcase) => {
     console.log(testcase);
     const data = {
@@ -191,7 +192,7 @@ const submitCode = asyncHandler(async (req, res) => {
         outputs.push(response.data.stderr);
       }
       if (response.data.stdout.trimEnd() === testcase.output)
-      // The trimEnd is to remove any escape sequence from the output.
+        // The trimEnd is to remove any escape sequence from the output.
         outputs.push("Accepted");
     } catch (error) {
       console.log("Error occurred: ", error);
@@ -207,13 +208,14 @@ const submitCode = asyncHandler(async (req, res) => {
   else res.status(200).json({ output: "Wrong Answer" });
 });
 // now you need to implement the judge0 logic here
+
 module.exports = {
   getProblem,
   getProblems,
   setProblem,
-  updateProblem,
   deleteProblem,
   deleteAllProblems,
   runCode,
   submitCode,
+  updateProblem,
 };
